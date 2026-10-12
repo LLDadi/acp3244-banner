@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RFID信息 - 车管系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        /* body 背景改为透明 */
+        body {
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Segoe UI, Arial, sans-serif;
+            color: #333;
+        }
+
+        /* 内容区域：背景改为透明 */
+        .content {
+            background: transparent;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #666; width: 90px; flex-shrink: 0; }
+        .info-value { color: #111; flex: 1; word-break: break-all; }
+
+        /* 防伪图片样式 */
+        .anti-fake-img {
+            display: block;
+            width: 600px;
+            height: 100px;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+            background: transparent;   /* 原来 #f9f9f9，一起改透明 */
+        }
+
+        /* 水印容器 */
+        #watermark-box { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; overflow: hidden; }
+        .watermark-item {
+            position: absolute;
+            color: rgba(0, 150, 80, 0.30);
+            font-size: 20px;
+            line-height: 1.4;
+            text-align: center;
+            white-space: nowrap;
+            transform: rotate(-20deg);
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 内容信息 -->
+    <div class="content">
+        <div class="info-row">
+            <div class="info-label">车牌号</div>
+            <div class="info-value">赣A88888</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">车主姓名</div>
+            <div class="info-value">蔡蔡</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">入网时间</div>
+            <div class="info-value">2024-07-09 11:31:46</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">防伪图片</div>
+            <div class="info-value">
+                <img class="anti-fake-img"
+                     src="banner.png"
+                     alt="防伪图片"
+                     width="600"
+                     height="100">
+            </div>
+        </div>
+    </div>
+
+    <!-- 水印容器（JS动态填充） -->
+    <div id="watermark-box"></div>
+
+    <script>
+        function generateWatermarks() {
+            const box = document.getElementById('watermark-box');
+            box.innerHTML = '';
+
+            const plate = '赣A88888';
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+            const gapX = 240;
+            const gapY = 190;
+
+            const cols = Math.ceil(screenWidth / gapX) + 2;
+            const rows = Math.ceil(screenHeight / gapY) + 2;
+
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    const item = document.createElement('div');
+                    item.className = 'watermark-item';
+                    item.innerHTML = plate + '<br>' + timeStr;
+                    item.style.left = (i * gapX - 50) + 'px';
+                    item.style.top = (j * gapY - 50) + 'px';
+                    box.appendChild(item);
+                }
+            }
+        }
+
+        generateWatermarks();
+        window.addEventListener('resize', generateWatermarks);
+    </script>
+
+</body>
+</html>
