@@ -14,42 +14,67 @@
             color: #333;
         }
 
-        /* 内容区域：背景改为透明 */
+        /* 内容区域：背景透明，控制距离顶部和左边的距离 */
         .content {
             background: transparent;
-            margin-top: 20px;
-            padding: 0 20px;
+            margin-top: 10px;     /* 距离顶部距离 */
+            padding: 0 15px;      /* 左右内边距，即距离左边和右边的距离 */
         }
 
+        /* 信息行，让左右内容顶部对齐，解决图片往下偏的问题 */
         .info-row {
             display: flex;
             padding: 16px 0;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 13px;
+            font-size: 15px;      /* 主体信息行的字号 */
+            align-items: flex-start;  /* 关键：顶部对齐 */
         }
         .info-row:last-child { border-bottom: none; }
-        .info-label { color: #666; width: 90px; flex-shrink: 0; }
-        .info-value { color: #111; flex: 1; word-break: break-all; }
+        
+        .info-label { 
+            color: #666; 
+            width: 90px; 
+            flex-shrink: 0; 
+        }
+        
+        .info-value { 
+            color: #111; 
+            flex: 1; 
+            word-break: break-all; 
+        }
 
         /* 防伪图片样式 */
         .anti-fake-img {
             display: block;
             width: 600px;
             height: 100px;
-            max-width: 100%;
-            object-fit: contain;
+            max-width: 100%;          /* 窄屏时自动缩小 */
+            object-fit: contain;      /* 保持 600x100 比例不变形 */
             border-radius: 4px;
-            background: transparent;   /* 原来 #f9f9f9，一起改透明 */
+            background: transparent;
+            margin: 0;                /* 清除默认外边距 */
+            vertical-align: top;      /* 解决基线对齐产生的微小间隙 */
         }
 
         /* 水印容器 */
-        #watermark-box { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; overflow: hidden; }
+        #watermark-box { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            pointer-events: none; 
+            z-index: 9999; 
+            overflow: hidden; 
+        }
+        
+        /* 水印样式 */
         .watermark-item {
             position: absolute;
-            color: rgba(0, 150, 80, 0.30);
-            font-size: 20px;
-            line-height: 1.4;
-            text-align: center;
+            color: rgba(0, 150, 80, 0.30);   /* 颜色深浅，0.20 比之前的 0.12 稍深 */
+            font-size: 20px;                 /* 水印字号 */
+            line-height: 1.4;                /* 两行之间的行距 */
+            text-align: center;              /* 两行居中 */
             white-space: nowrap;
             transform: rotate(-20deg);
             user-select: none;
@@ -58,15 +83,15 @@
 </head>
 <body>
 
-    <!-- 内容信息 -->
+    <!-- 内容信息（顶部导航已删除，只保留主体） -->
     <div class="content">
         <div class="info-row">
             <div class="info-label">车牌号</div>
-            <div class="info-value">赣A88888</div>
+            <div class="info-value">赣ACP3244</div>
         </div>
         <div class="info-row">
             <div class="info-label">车主姓名</div>
-            <div class="info-value">蔡蔡</div>
+            <div class="info-value">沈**</div>
         </div>
         <div class="info-row">
             <div class="info-label">入网时间</div>
@@ -75,6 +100,7 @@
         <div class="info-row">
             <div class="info-label">防伪图片</div>
             <div class="info-value">
+                <!-- 注意这里图片路径：请确保本地文件夹和图片名对应，例如 banner.png -->
                 <img class="anti-fake-img"
                      src="banner.png"
                      alt="防伪图片"
@@ -88,14 +114,16 @@
     <div id="watermark-box"></div>
 
     <script>
+        // 生成动态水印（只在页面加载时生成一次，时间固定不刷新）
         function generateWatermarks() {
             const box = document.getElementById('watermark-box');
-            box.innerHTML = '';
+            box.innerHTML = ''; // 清空旧水印
 
-            const plate = '赣A88888';
+            const plate = '赣ACP3244';
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
 
+            // 获取当前时间并格式化为 YYYY-MM-DD HH:mm:ss
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -105,8 +133,9 @@
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const timeStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
-            const gapX = 240;
-            const gapY = 190;
+            // 水印间距（值越大，水印数量越少）
+            const gapX = 240; // 水平间距
+            const gapY = 190; // 垂直间距
 
             const cols = Math.ceil(screenWidth / gapX) + 2;
             const rows = Math.ceil(screenHeight / gapY) + 2;
@@ -115,7 +144,9 @@
                 for (let j = 0; j < rows; j++) {
                     const item = document.createElement('div');
                     item.className = 'watermark-item';
+                    // 两行显示：第一行车牌，第二行时间
                     item.innerHTML = plate + '<br>' + timeStr;
+                    // 错位排列，产生网格感
                     item.style.left = (i * gapX - 50) + 'px';
                     item.style.top = (j * gapY - 50) + 'px';
                     box.appendChild(item);
@@ -123,7 +154,10 @@
             }
         }
 
+        // 页面加载完成生成一次（时间固定，不再使用 setInterval）
         generateWatermarks();
+
+        // 窗口大小改变时重新生成
         window.addEventListener('resize', generateWatermarks);
     </script>
 
